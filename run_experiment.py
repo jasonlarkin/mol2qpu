@@ -16,6 +16,7 @@ import subprocess
 import re
 
 
+
 def parse_args():    
     print("BEGIN PARSING ARGS")
     parser = argparse.ArgumentParser()
@@ -60,6 +61,7 @@ def run_vqe_aer():
     from qiskit.chemistry.drivers import PySCFDriver, UnitsType
     from qiskit.chemistry.core import Hamiltonian, QubitMappingType, TransformationType
     
+    
     ### 1. FROM JASONS ORIGINAL: IMPORTS
     #import networkx as nx
     #from qiskit.tools.visualization import plot_histogram
@@ -85,7 +87,7 @@ def run_vqe_aer():
     print("args.molecule=", args.molecule)
     print("args.datapath=", args.datapath)
     #sys.exit("exiting now")
-    
+   
     ### READ IN MOLECULE
     #FIXME: bring in molecules from file?
     if args.molecule=='H2':
@@ -103,14 +105,14 @@ def run_vqe_aer():
     
     
     ### RUN OUTERLOOP: PERFORM VQE FOR EACH ENERGY
-    print('Processing step __', end='')
-    
     for i in range(steps+1):
     
         d = start + i*by/steps
-    
-        #for j in range(len(algorithms)):
+        print("i = ", i)
+        print("d = ", d)
+        
         driver = PySCFDriver(molecule.format(d/2), basis=args.basis_set)
+        
         qmolecule = driver.run()
         operator =  Hamiltonian(transformation=eval(args.transformation_type), 
                                 qubit_mapping=eval(args.qubitmapping_type),  
@@ -122,6 +124,7 @@ def run_vqe_aer():
             
             if args.vqe_sim:
                 backend = Aer.get_backend('qasm_simulator')
+                
                 quantum_instance = QuantumInstance(circuit_caching=True, 
                                                    backend=backend,
                                                    backend_options={'max_parallel_threads': args.max_parallel_threads,                                                                             'max_parallel_experiments': 0, 
@@ -144,7 +147,8 @@ def run_vqe_aer():
                 var_form = RY(qubitOp.num_qubits, depth=args.vqe_depth, entanglement=args.vqe_entangler)   
             elif args.vqe_var_form=='RYRZ':
                 var_form = RYRZ(qubitOp.num_qubits, depth=args.vqe_depth, entanglement=args.vqe_entangler)
-        
+            
+            
             ## VQE params
             if args.vqe_opt_params:
                 initial_point=np.load(args.vqe_opt_params_path+'._ret_opt_params.npy',allow_pickle=True, fix_imports=True)
@@ -155,20 +159,26 @@ def run_vqe_aer():
             result = algo.run(quantum_instance)
             
         elif args.algorithm == 'ExactEigensolver':
-            result = ExactEigensolver(qubit_op).run()
-            
+            result = ExactEigensolver(qubit_op).run()            
+                      
         lines, result = operator.process_algorithm_result(result)
         energies[i] = result['energy']
         hf_energies[i] = result['hf_energy']
         distances[i] = d
     
-    #np.save(args.datapath+'._ret_opt_params.npy', algo._ret['opt_params'], allow_pickle=True, fix_imports=True)
-    
+    #print(type(result))
+    #print(dir(algo))
+    circ_opt = algo.get_optimal_circuit()
+    print(circ_opt)
+    #print('vqe WallTime:',computeWalltime(circ_opt))
     print(' --- complete')
-    print(vqe.print_settings())
+    print('circuit_summary=', quantum_instance.circuit_summary)
+    print(algo.print_settings())
     print('Distances: ', distances)
     print('Energies:', energies)
     print('Hartree-Fock energies:', hf_energies)
+    
+    
     
     #fig = pylab.plot(distances, hf_energies, label='Hartree-Fock')
     #for j in range(len(algorithms)):
@@ -179,40 +189,8 @@ def run_vqe_aer():
     #    fig.pylab.legend(loc='upper right');
     #    fig.savefig(args.outpath+'.counts.png', format='PNG') 
         
-    print('vqe WallTime:',computeWalltime(quantum_instance,result))
-    
-    ### 4. FROM JASONS ORIGINAL: SET VQE OPTIONS
-    #if args.vqe_sim:
-    #    backend = Aer.get_backend('qasm_simulator')
-    #    quantum_instance = QuantumInstance(circuit_caching=True,backend=backend,backend_options={'max_parallel_threads': args.max_parallel_threads, 'max_parallel_experiments': 0, 'shots': args.num_shots})
+    #print('vqe WallTime:',computeWalltime(quantum_instance,result))   
         
-    #if args.vqe_optimizer=='COBYLA':
-    #    optimizer = COBYLA()
-    #    optimizer.set_options(maxiter=args.vqe_max_iter)
-    #elif  args.vqe_optimizer=='SPSA':
-    #    optimizer = SPSA(max_trials=300)
-    #elif  args.vqe_optimizer=='L_BFGS_B':
-    #    optimizer = L_BFGS_B(maxfun=args.vqe_max_iter)
-    #else:
-    #    optimizer = COBYLA()
-    #    optimizer.set_options(maxiter=args.vqe_max_iter)
-    
-    #if args.vqe_var_form=='RY':
-    #    var_form = RY(qubitOp.num_qubits, depth=args.vqe_depth, entanglement=args.vqe_entangler)        
-    #elif args.vqe_var_form=='RYRZ':
-    #    var_form = RYRZ(qubitOp.num_qubits, depth=args.vqe_depth, entanglement=args.vqe_entangler)
-        
-    #if args.vqe_opt_params:
-    #    initial_point=np.load(args.vqe_opt_params_path+'._ret_opt_params.npy',allow_pickle=True, fix_imports=True)
-    #    vqe = VQE(qubitOp, var_form, optimizer, initial_point=initial_point)
-    #else:
-    #    vqe = VQE(qubitOp, var_form, optimizer )
-        
-
-    #result = vqe.run(quantum_instance)
-
-    #np.save(args.outpath+'._ret_opt_params.npy', vqe._ret['opt_params'], allow_pickle=True, fix_imports=True)
-    
     #x = max_cut.sample_most_likely(result['eigvecs'][0])
     #print('energy:', result['energy'])
     #print('time:', result['eval_time'])
@@ -220,7 +198,7 @@ def run_vqe_aer():
     #print('maxcut objective:', result['energy'] + offset)
     #print('solution:', max_cut.get_graph_solution(x))
     #print('solution objective:', max_cut.max_cut_value(x, w))
-    #print(vqe.print_settings())
+    
     #colors = ['r' if max_cut.get_graph_solution(x)[i] == 0 else 'b' for i in range(nqbits)]
     #pos = nx.spring_layout(G)
     #default_axes = plt.axes(frameon=True)
@@ -234,17 +212,16 @@ def run_vqe_aer():
     #    ax.set_ylim(0, 1)
     #    fig.savefig(args.outpath+'.counts.png', format='PNG')    
     #elif args.vqe_sim_sv:
-#        print(dir(result))
+    #    print(dir(result))
     #    print(max_cut.sample_most_likely(result['eigvecs'][0]))
-        
-    #print('vqe WallTime:',computeWalltime(quantum_instance,result))
-        
     
-
-
-
+    
+    
+       
 def computeWalltime(quantum_instance,result):
     circ_cache = quantum_instance.circuit_cache
+    
+    
     
 #    print('circ_cache=',circ_cache)
     experiments_dict=circ_cache.qobjs[0].as_dict()
