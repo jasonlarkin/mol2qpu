@@ -19,7 +19,7 @@ else
        python run_experiment.py --molecule='H2' \ #--random_seed=750 ## throws error in numpy if u leave this in
        --basis_set='sto3g' --algorithm='VQE' \
        --transformation_type='TransformationType.FULL' --qubitmapping_type='QubitMappingType.PARITY' --two_qubit_reduce \
-       --vqe_optimizer='SPSA' --vqe_max_iter=10 --vqe_var_form='RY' --vqe_depth=3 --vqe_entangler='linear' --num_shots=1000 \
+       --vqe_optimizer='SPSA' --vqe_max_iter=10 --vqe_var_form='RY' --vqe_depth=1 --vqe_entangler='linear' --num_shots=100 \
        --max_parallel_threads=10 --vqe_sim --vqe_aer --datapath=$DATA_PATH &> $DATA_PATH/$1.H2.vqe.out
        #--vqe_optimizer=='COBYLA'
        #--vqe_optimizer=='L_BFGS_B'
