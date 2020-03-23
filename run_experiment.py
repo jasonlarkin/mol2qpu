@@ -177,9 +177,7 @@ def run_vqe_aer():
     print('Distances: ', distances)
     print('Energies:', energies)
     print('Hartree-Fock energies:', hf_energies)
-    
-    
-    
+            
     #fig = pylab.plot(distances, hf_energies, label='Hartree-Fock')
     #for j in range(len(algorithms)):
     #    fig.pylab.plot(distances, energies[j], label=algorithms[j])
