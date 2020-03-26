@@ -61,16 +61,22 @@ d = start
 
 driver = PySCFDriver(molecule.format(d/2), basis=args.basis_set)
 qmolecule = driver.run()
+
+ferOp = FermionicOperator(h1=qmolecule.one_body_integrals, h2=qmolecule.two_body_integrals)
+
 #operator =  Hamiltonian(transformation=eval(args.transformation_type), 
 #                        qubit_mapping=eval(args.qubitmapping_type),  
 #                        two_qubit_reduction=args.two_qubit_reduce)
 
 
-print(dir(qmolecule))
-print(qmolecule.num_orbitals)
-print(qmolecule.num_atoms)
-print(qmolecule.num_alpha)
-print(qmolecule.num_beta)
+
+
+#print(dir(qmolecule))
+print("num orbitals = ", qmolecule.num_orbitals)
+print("num alpha = ", qmolecule.num_alpha)
+print("num beta = ", qmolecule.num_beta)
+
+print(dir(operator))
 
 #lines, result_op = operator.process_algorithm_result(result)
 
