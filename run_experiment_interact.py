@@ -18,16 +18,18 @@ from qiskit.aqua import aqua_globals, QuantumInstance
 from qiskit.aqua.algorithms import ExactEigensolver, VQE
 from qiskit.aqua.components.optimizers import SPSA, COBYLA, L_BFGS_B
 from qiskit.aqua.components.variational_forms import RY, RYRZ
-from qiskit.chemistry.drivers import PySCFDriver, UnitsType
+from qiskit.chemistry import FermionicOperator
 from qiskit.chemistry.core import Hamiltonian, QubitMappingType, TransformationType
+from qiskit.chemistry.drivers import PySCFDriver, UnitsType
 import types
-
 args = types.SimpleNamespace()
 args.molecule='Be2' 
-args.basis_set='ccpvtz' 
+args.basis_set='ccpvdz' 
+#args.basis_set='sto3g' 
 args.algorithm='VQE' 
 args.transformation_type='TransformationType.FULL' 
-args.qubitmapping_type='QubitMappingType.BRAVYI_KITAEV' 
+#args.qubitmapping_type='QubitMappingType.BRAVYI_KITAEV' 
+args.qubitmapping_type='bravyi_kitaev'
 args.two_qubit_reduce = True
 args.vqe_optimizer='SPSA' 
 args.vqe_max_iter=2
@@ -56,27 +58,23 @@ energies = np.zeros(steps+1)
 hf_energies = np.zeros(steps+1)
 distances = np.zeros(steps+1)
 aqua_globals.random_seed = args.random_seed
-
 d = start
 
 driver = PySCFDriver(molecule.format(d/2), basis=args.basis_set)
 qmolecule = driver.run()
-
-ferOp = FermionicOperator(h1=qmolecule.one_body_integrals, h2=qmolecule.two_body_integrals)
+#ferOp = FermionicOperator(h1=qmolecule.one_body_integrals, h2=qmolecule.two_body_integrals)
+#qubitOp = ferOp.mapping(map_type=args.qubitmapping_type,threshold=0.00000001)
 
 #operator =  Hamiltonian(transformation=eval(args.transformation_type), 
 #                        qubit_mapping=eval(args.qubitmapping_type),  
 #                        two_qubit_reduction=args.two_qubit_reduce)
 
-
-
-
 #print(dir(qmolecule))
 print("num orbitals = ", qmolecule.num_orbitals)
 print("num alpha = ", qmolecule.num_alpha)
 print("num beta = ", qmolecule.num_beta)
-
-print(dir(operator))
+print(dir(ferOp))
+print(dir(qubitOp))
 
 #lines, result_op = operator.process_algorithm_result(result)
 
