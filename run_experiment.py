@@ -97,7 +97,7 @@ def run_vqe_aer():
         
     start = 0.5  # Start distance
     by    = 0.5  # How much to increase distance by
-    steps = 1  # Number of steps to increase by
+    steps = 20  # Number of steps to increase by
     energies = np.zeros(steps+1)
     hf_energies = np.zeros(steps+1)
     distances = np.zeros(steps+1)
