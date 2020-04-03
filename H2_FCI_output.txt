@@ -1,0 +1,5 @@
+molecule file =  /home/ubuntu/mol2qpu/output/operators/molecule/H2_ccpvdz_0pt55_MOLE.pkl
+qubit file =  /home/ubuntu/mol2qpu/output/operators/qubit/H2_ccpvdz_0pt55_QUBIT_bk.pkl
+num orbitals =  10
+num_particles =  2
+num qubits =  20
